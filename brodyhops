@@ -1,0 +1,926 @@
+
+<html>
+<head>
+<title>Brody's Site</title>
+<style>
+body {
+  background-color: black;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: background-color 0.5s;
+}
+h1, h2, p {
+  color: white;
+  text-align: center;
+  margin: 10px 0;
+}
+.cta-button {
+    display: inline-block;
+    text-decoration: none;
+    background-color: white;
+    color: black;
+    padding: 12px 24px;
+    border: 2px solid white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+.cta-button:hover {
+    background-color: transparent;
+    color: white;
+}
+.trail-particle {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 12px;
+    height: 12px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    animation: fadeAndShrink 0.6s ease-out forwards;
+    z-index: 9999;
+}
+@keyframes fadeAndShrink {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.1); }
+}
+#pet-wrap {
+    position: fixed;
+    bottom: 60px;
+    left: 20px;
+    z-index: 99999;
+    cursor: pointer;
+    user-select: none;
+}
+#pet-canvas {
+    display: block;
+    image-rendering: pixelated;
+    width: 64px;
+    height: 64px;
+}
+#pet-bubble {
+    position: absolute;
+    bottom: 70px;
+    left: 0;
+    background: white;
+    color: black;
+    font-family: sans-serif;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    display: none;
+    white-space: nowrap;
+}
+#pet-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 12px;
+    border-width: 6px 5px 0;
+    border-style: solid;
+    border-color: white transparent transparent;
+}
+
+/* === GAMES PANEL === */
+#games-btn {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+    font-family: sans-serif;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 99999;
+}
+#games-panel {
+    display: none;
+    position: fixed;
+    top: 50px;
+    left: 14px;
+    background: #111;
+    border: 1px solid #444;
+    border-radius: 12px;
+    padding: 12px;
+    z-index: 99999;
+    font-family: sans-serif;
+    gap: 8px;
+    flex-direction: column;
+}
+#games-panel button {
+    background: #222;
+    color: white;
+    border: 1px solid #555;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: left;
+}
+#games-panel button:hover { background: #333; }
+
+/* === MODAL === */
+#modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999999;
+    align-items: center;
+    justify-content: center;
+}
+#modal-overlay.open { display: flex; }
+#modal-box {
+    background: #111;
+    border: 1px solid #444;
+    border-radius: 16px;
+    padding: 20px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow: auto;
+    position: relative;
+    font-family: sans-serif;
+    color: white;
+}
+#modal-close {
+    position: absolute;
+    top: 10px; right: 14px;
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 22px;
+    cursor: pointer;
+}
+#modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 14px;
+}
+#modal-content { min-width: 280px; }
+
+/* Snake */
+#snake-canvas { display: block; background: #000; border: 1px solid #333; }
+#snake-score { margin-bottom: 8px; font-size: 14px; color: #aaa; }
+
+/* Pong */
+#pong-canvas { display: block; background: #000; border: 1px solid #333; }
+#pong-score { margin-bottom: 8px; font-size: 14px; color: #aaa; }
+
+/* Whack */
+#whack-grid { display: grid; grid-template-columns: repeat(3,80px); gap: 8px; margin-top: 8px; }
+.mole-hole {
+    width: 80px; height: 80px;
+    background: #222;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    cursor: pointer;
+    border: 2px solid #444;
+    user-select: none;
+}
+#whack-score { font-size: 14px; color: #aaa; margin-bottom: 8px; }
+
+/* Typing */
+#typing-text { font-size: 16px; color: #888; margin-bottom: 10px; line-height: 1.6; }
+#typing-text span.done { color: #4f4; }
+#typing-text span.wrong { color: #f44; background: #300; }
+#typing-text span.current { background: #555; }
+#typing-input { background: #222; border: 1px solid #555; color: white; padding: 8px; border-radius: 6px; width: 100%; box-sizing: border-box; font-size: 14px; }
+#typing-stats { margin-top: 8px; font-size: 13px; color: #aaa; }
+
+/* RPS */
+#rps-btns { display: flex; gap: 10px; margin: 10px 0; }
+#rps-btns button { font-size: 28px; background: #222; border: 1px solid #555; border-radius: 10px; padding: 10px 16px; cursor: pointer; }
+#rps-result { font-size: 15px; margin-top: 8px; min-height: 24px; }
+#rps-score { font-size: 13px; color: #aaa; }
+
+/* Memory */
+#memory-grid { display: grid; grid-template-columns: repeat(4,60px); gap: 8px; margin-top: 8px; }
+.mem-card {
+    width: 60px; height: 60px;
+    background: #333;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    cursor: pointer;
+    border: 2px solid #555;
+    transition: transform 0.2s;
+    user-select: none;
+}
+.mem-card.flipped { background: #222; border-color: #aaa; }
+.mem-card.matched { background: #143; border-color: #4f4; }
+#memory-moves { font-size: 13px; color: #aaa; margin-bottom: 8px; }
+
+/* Magic 8 ball */
+#ball-display {
+    width: 140px; height: 140px;
+    background: #111;
+    border-radius: 50%;
+    border: 4px solid #222;
+    display: flex; align-items: center; justify-content: center;
+    margin: 12px auto;
+    font-size: 13px;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+    color: #8af;
+    font-weight: bold;
+}
+#ball-q { width: 100%; background: #222; border: 1px solid #555; color: white; padding: 8px; border-radius: 6px; font-size: 14px; box-sizing: border-box; margin-bottom: 8px; }
+
+/* Hacker terminal */
+#hacker-canvas-wrap {
+    background: #000;
+    border: 1px solid #0f0;
+    border-radius: 8px;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 13px;
+    color: #0f0;
+    height: 260px;
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* Drawing canvas */
+#draw-canvas { display: block; background: #000; border: 1px solid #333; cursor: crosshair; touch-action: none; }
+#draw-controls { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+#draw-controls input[type=color] { width: 36px; height: 36px; border: none; background: none; cursor: pointer; }
+#draw-controls input[type=range] { width: 80px; }
+#draw-controls button { background: #222; color: white; border: 1px solid #555; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+
+/* Mood selector */
+#mood-bar {
+    position: fixed;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 6px;
+    z-index: 99999;
+}
+.mood-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.mood-btn:hover { transform: scale(1.2); }
+
+/* Compliment / Roast */
+#compliment-box, #roast-box {
+    font-size: 18px;
+    text-align: center;
+    min-height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 12px 0;
+    color: #fff;
+    line-height: 1.4;
+}
+.fun-btn {
+    display: block;
+    width: 100%;
+    background: #222;
+    color: white;
+    border: 1px solid #555;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 8px;
+}
+.fun-btn:hover { background: #333; }
+
+/* Self destruct */
+#destruct-num {
+    font-size: 80px;
+    text-align: center;
+    color: #f44;
+    font-family: monospace;
+    font-weight: bold;
+}
+#destruct-msg { text-align: center; font-size: 16px; color: #aaa; margin-top: 8px; }
+
+/* Fireworks */
+.firework-particle {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    width: 6px;
+    height: 6px;
+    z-index: 9998;
+}
+
+/* Ripple */
+.ripple {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    border: 2px solid rgba(255,255,255,0.6);
+    transform: translate(-50%,-50%) scale(0);
+    animation: rippleAnim 0.6s ease-out forwards;
+    z-index: 9997;
+}
+@keyframes rippleAnim {
+    to { transform: translate(-50%,-50%) scale(4); opacity: 0; }
+}
+
+/* Konami */
+#konami-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: black;
+    z-index: 9999999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-family: sans-serif;
+}
+#konami-overlay.show { display: flex; }
+#konami-text {
+    font-size: 48px;
+    color: #fff;
+    animation: rainbow 0.5s linear infinite;
+}
+@keyframes rainbow {
+    0%{color:#f00} 15%{color:#ff0} 33%{color:#0f0} 50%{color:#0ff} 66%{color:#00f} 83%{color:#f0f} 100%{color:#f00}
+}
+#konami-sub { color: #aaa; font-size: 16px; margin-top: 12px; }
+
+/* Confetti */
+.confetti-piece {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+    z-index: 99998;
+    animation: confettiFall linear forwards;
+}
+@keyframes confettiFall {
+    to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+/* Notes */
+#notes-area {
+    width: 100%;
+    height: 200px;
+    background: #1a1a1a;
+    border: 1px solid #444;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    padding: 10px;
+    box-sizing: border-box;
+    resize: none;
+    font-family: sans-serif;
+}
+#notes-saved { font-size: 12px; color: #4f4; margin-top: 6px; display: none; }
+
+/* Todo */
+#todo-input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+#todo-input { flex: 1; background: #222; border: 1px solid #555; color: white; padding: 8px; border-radius: 6px; font-size: 14px; }
+#todo-add { background: #333; color: white; border: 1px solid #555; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+#todo-list { list-style: none; padding: 0; margin: 0; max-height: 200px; overflow-y: auto; }
+#todo-list li {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #222;
+    font-size: 14px;
+    color: white;
+}
+#todo-list li.done span { text-decoration: line-through; color: #666; }
+#todo-list li button { background: none; border: none; color: #f44; cursor: pointer; font-size: 16px; padding: 0 4px; }
+#todo-list li input[type=checkbox] { cursor: pointer; }
+
+/* Color picker */
+#color-picker-wrap { display: flex; gap: 12px; align-items: center; margin-top: 10px; }
+#site-color-pick { width: 60px; height: 60px; border: none; background: none; cursor: pointer; border-radius: 8px; }
+#color-label { font-size: 13px; color: #aaa; }
+
+/* Font size */
+#font-slider-wrap { display: flex; gap: 12px; align-items: center; margin-top: 10px; }
+#font-size-slider { flex: 1; }
+#font-size-val { font-size: 13px; color: #aaa; min-width: 30px; }
+
+/* Stopwatch */
+#stopwatch-display { font-size: 48px; font-family: monospace; text-align: center; color: #fff; margin: 10px 0; }
+#stopwatch-btns { display: flex; gap: 8px; justify-content: center; }
+#stopwatch-btns button { background: #222; color: white; border: 1px solid #555; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<!-- MOOD BAR -->
+<div id="mood-bar">
+  <div class="mood-btn" style="background:#000" title="Black" onclick="setMood('#000000')"></div>
+  <div class="mood-btn" style="background:#0a0a2e" title="Night" onclick="setMood('#0a0a2e')"></div>
+  <div class="mood-btn" style="background:#1a0a00" title="Lava" onclick="setMood('#1a0a00')"></div>
+  <div class="mood-btn" style="background:#001a0a" title="Forest" onclick="setMood('#001a0a')"></div>
+  <div class="mood-btn" style="background:#1a001a" title="Purple" onclick="setMood('#1a001a')"></div>
+</div>
+
+<!-- GAMES BUTTON -->
+<button id="games-btn" onclick="toggleGames()">🎮 stuff</button>
+<div id="games-panel">
+  <button onclick="openGame('snake')">🐍 Snake</button>
+  <button onclick="openGame('pong')">🏓 Pong</button>
+  <button onclick="openGame('whack')">🔨 Whack-a-mole</button>
+  <button onclick="openGame('typing')">⌨️ Typing test</button>
+  <button onclick="openGame('rps')">✊ Rock Paper Scissors</button>
+  <button onclick="openGame('memory')">🃏 Memory</button>
+  <button onclick="openGame('magic8')">🎱 Magic 8 Ball</button>
+  <button onclick="openGame('hacker')">💻 Hacker terminal</button>
+  <button onclick="openGame('draw')">🎨 Draw</button>
+  <button onclick="openGame('compliment')">💖 Compliment me</button>
+  <button onclick="openGame('destruct')">💣 Self destruct</button>
+  <button onclick="openGame('notes')">📝 Notes</button>
+  <button onclick="openGame('todo')">✅ To-do list</button>
+  <button onclick="openGame('color')">🎨 Site color</button>
+  <button onclick="openGame('fontsize')">🔤 Font size</button>
+  <button onclick="openGame('stopwatch')">⏱ Stopwatch</button>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <button id="modal-close" onclick="closeModal()">✕</button>
+    <div id="modal-title"></div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<!-- KONAMI -->
+<div id="konami-overlay">
+  <div id="konami-text">🎉 CHEAT CODE! 🎉</div>
+  <div id="konami-sub">↑↑↓↓←→←→BA — you found it</div>
+  <button onclick="document.getElementById('konami-overlay').classList.remove('show')" style="margin-top:20px;background:#222;color:white;border:1px solid #555;padding:10px 20px;border-radius:8px;cursor:pointer;font-size:14px">close</button>
+</div>
+
+<!-- TIME BADGE -->
+<script>
+const start = Date.now();
+const badge = document.createElement('div');
+badge.style.cssText = `
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1a1a1a;
+  color: #fff;
+  font-family: sans-serif;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  z-index: 99999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  pointer-events: none;
+`;
+document.body.appendChild(badge);
+setInterval(() => {
+  const secs = Math.floor((Date.now() - start) / 1000);
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  if (m === 0) badge.textContent = `⏱ ${s}s on this page`;
+  else if (m === 1) badge.textContent = `⏱ 1 minute on this page`;
+  else badge.textContent = `⏱ ${m} minutes on this page`;
+}, 1000);
+</script>
+
+<h1>Welcome to Brody's Site!</h1>
+<p>This is a awesome site! Enjoy your stay!</p>
+<a href="https://youtube.com/@brodyhops" class="cta-button">YT Channel</a>
+<img src="https://cdn.create.vista.com/api/media/small/193020284/stock-photo-smiling-builder-orange-overall-hard-hat-using-digital-tablet-isolated" alt="Me BTW" class="site-image">
+
+<div id="pet-wrap">
+  <div id="pet-bubble"></div>
+  <canvas id="pet-canvas" width="16" height="16"></canvas>
+</div>
+
+<!-- CURSOR TRAIL -->
+<script>
+document.addEventListener('mousemove', (e) => {
+    const particle = document.createElement('div');
+    particle.className = 'trail-particle';
+    particle.style.left = `${e.clientX}px`;
+    particle.style.top = `${e.clientY}px`;
+    document.body.appendChild(particle);
+    setTimeout(() => particle.remove(), 600);
+});
+</script>
+
+<!-- PIXEL DOG -->
+<script>
+const canvas = document.getElementById('pet-canvas');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('pet-wrap');
+const bubble = document.getElementById('pet-bubble');
+const B='#8B4513',D='#5C2A00',T='#FFD700',N='#111111',P='#FFB6C1',_=null;
+const frames=[
+  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,D,D,_,_,_,_,_,_,_,_,_,_,_,_,_,D,B,B,D,_,_,_,D,D,_,_,_,_,_,_,_,B,B,B,B,_,_,D,B,B,D,_,_,_,_,_,_,B,N,B,N,B,B,B,B,B,B,B,_,_,_,_,_,B,B,B,B,B,B,B,B,B,B,B,_,_,_,_,_,_,B,B,B,T,T,T,B,B,_,_,_,_,_,_,_,_,B,T,T,T,T,T,T,B,_,_,_,_,_,_,_,_,B,T,T,T,T,T,T,B,_,_,_,_,_,_,_,_,B,B,B,B,B,B,B,B,_,_,_,_,_,_,_,D,B,B,_,_,_,_,B,B,D,_,_,_,_,_,_,B,B,_,_,_,_,_,_,B,B,_,_,_,_,_,_,B,B,_,_,_,_,_,_,B,B,_,_,_,_,_,_,D,D,_,_,_,_,_,_,D,D,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,D,D,_,_,_,_,_,_,_,_,_,_,_,_,_,D,B,B,D,_,_,_,D,D,_,_,_,_,_,_,_,B,B,B,B,_,_,D,B,B,D,_,_,_,_,_,_,B,N,B,N,B,B,B,B,B,B,B,_,_,_,_,_,B,B,B,B,B,B,B,B,B,B,B,_,_,_,_,_,_,B,B,B,T,T,T,B,B,_,_,_,_,_,_,_,_,B,T,T,T,T,T,T,B,_,_,_,_,_,_,_,_,B,T,T,T,T,T,T,B,_,_,_,_,_,_,_,_,B,B,B,B,B,B,B,B,_,_,_,_,_,_,D,B,B,_,_,_,_,_,B,B,_,_,_,_,_,B,B,_,_,_,_,_,_,_,B,B,D,_,_,_,_,B,B,_,_,_,_,_,_,_,_,B,B,_,_,_,_,D,D,_,_,_,_,_,_,_,_,D,D,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+  [_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,D,D,_,_,_,_,_,_,D,_,_,_,_,_,_,D,B,B,D,_,_,_,D,D,B,D,_,_,_,_,_,B,B,B,B,_,_,D,B,B,D,_,_,_,_,_,_,B,N,B,N,B,B,B,B,B,B,B,_,_,_,_,_,B,B,B,B,B,B,B,B,B,B,B,_,_,_,_,_,_,B,B,B,T,T,T,B,B,_,_,_,_,_,_,_,_,B,T,T,T,T,T,T,B,_,_,_,_,_,_,_,_,B,T,T,T,T,T,T,B,_,_,_,_,_,_,_,_,B,B,B,B,B,B,B,B,_,_,_,_,_,_,_,D,B,B,_,_,_,_,B,B,D,_,_,_,_,_,_,B,B,_,_,_,_,_,_,B,B,_,_,_,_,_,_,B,B,_,_,_,_,_,_,B,B,_,_,_,_,_,_,D,D,_,_,_,_,_,_,D,D,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_,_],
+];
+function drawFrame(f){ctx.clearRect(0,0,16,16);const data=frames[f];for(let i=0;i<256;i++){if(data[i]){ctx.fillStyle=data[i];ctx.fillRect(i%16,Math.floor(i/16),1,1);}}}
+let frame=0,petX=20,direction=1,sleeping=false;
+const phrases=['woof!','hi!!','pet me!','i live here now','brody is cool','*panting*','check the YT!','zzzz...','ball??','bork!'];
+setInterval(()=>{if(sleeping)return;petX+=direction*1.5;if(petX>window.innerWidth-80)direction=-1;if(petX<10)direction=1;wrap.style.left=petX+'px';wrap.style.transform=direction===-1?'scaleX(-1)':'scaleX(1)';bubble.style.transform=direction===-1?'scaleX(-1)':'scaleX(1)';},80);
+setInterval(()=>{if(sleeping){drawFrame(0);return;}frame=(frame+1)%frames.length;drawFrame(frame);},200);
+setInterval(()=>{if(Math.random()<0.15)sleeping=!sleeping;},7000);
+wrap.addEventListener('click',()=>{if(sleeping){sleeping=false;bubble.textContent='hey i was sleeping!!';}else{bubble.textContent=phrases[Math.floor(Math.random()*phrases.length)];}bubble.style.display='block';setTimeout(()=>bubble.style.display='none',2000);});
+drawFrame(0);
+</script>
+
+<!-- RIPPLE ON CLICK -->
+<script>
+document.addEventListener('click', (e) => {
+  if (e.target.closest('#modal-overlay, #games-panel, #games-btn, #mood-bar, #pet-wrap')) return;
+  const r = document.createElement('div');
+  r.className = 'ripple';
+  r.style.left = e.clientX + 'px';
+  r.style.top = e.clientY + 'px';
+  r.style.width = '60px'; r.style.height = '60px';
+  document.body.appendChild(r);
+  setTimeout(() => r.remove(), 700);
+});
+</script>
+
+<!-- DOUBLE CLICK FIREWORK -->
+<script>
+document.addEventListener('dblclick', (e) => {
+  if (e.target.closest('#modal-overlay, #games-panel, #games-btn')) return;
+  const colors = ['#ff0','#f0f','#0ff','#f44','#4f4','#48f'];
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('div');
+    p.className = 'firework-particle';
+    p.style.left = e.clientX + 'px';
+    p.style.top = e.clientY + 'px';
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const angle = (i / 24) * Math.PI * 2;
+    const dist = 60 + Math.random() * 60;
+    const tx = Math.cos(angle) * dist;
+    const ty = Math.sin(angle) * dist;
+    p.style.transition = `transform 0.7s ease-out, opacity 0.7s ease-out`;
+    document.body.appendChild(p);
+    requestAnimationFrame(() => {
+      p.style.transform = `translate(${tx}px, ${ty}px)`;
+      p.style.opacity = '0';
+    });
+    setTimeout(() => p.remove(), 800);
+  }
+});
+</script>
+
+<!-- KONAMI CODE -->
+<script>
+const konamiCode = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+let konamiIdx = 0;
+document.addEventListener('keydown', (e) => {
+  if (e.key === konamiCode[konamiIdx]) {
+    konamiIdx++;
+    if (konamiIdx === konamiCode.length) {
+      document.getElementById('konami-overlay').classList.add('show');
+      spawnConfetti();
+      konamiIdx = 0;
+    }
+  } else { konamiIdx = 0; }
+});
+function spawnConfetti() {
+  const colors = ['#ff0','#f0f','#0ff','#f44','#4f4','#f80'];
+  for (let i = 0; i < 80; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-piece';
+    c.style.left = Math.random()*100 + 'vw';
+    c.style.top = '-10px';
+    c.style.background = colors[Math.floor(Math.random()*colors.length)];
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    c.style.animationDuration = (0.8 + Math.random()*1.5) + 's';
+    c.style.animationDelay = Math.random()*0.5 + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 2500);
+  }
+}
+</script>
+
+<!-- MOOD -->
+<script>
+function setMood(color) {
+  document.body.style.backgroundColor = color;
+}
+</script>
+
+<!-- GAMES LOGIC -->
+<script>
+function toggleGames() {
+  const p = document.getElementById('games-panel');
+  p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.getElementById('modal-content').innerHTML = '';
+  if (window._gameCleanup) { window._gameCleanup(); window._gameCleanup = null; }
+  document.getElementById('games-panel').style.display = 'none';
+}
+
+function openGame(type) {
+  document.getElementById('games-panel').style.display = 'none';
+  const overlay = document.getElementById('modal-overlay');
+  const title = document.getElementById('modal-title');
+  const content = document.getElementById('modal-content');
+  if (window._gameCleanup) { window._gameCleanup(); window._gameCleanup = null; }
+  content.innerHTML = '';
+  overlay.classList.add('open');
+
+  if (type === 'snake') {
+    title.textContent = '🐍 Snake';
+    content.innerHTML = '<div id="snake-score">score: 0</div><canvas id="snake-canvas" width="280" height="280"></canvas><div style="font-size:12px;color:#666;margin-top:6px">arrow keys to move</div>';
+    startSnake();
+  } else if (type === 'pong') {
+    title.textContent = '🏓 Pong';
+    content.innerHTML = '<div id="pong-score">you: 0 — ai: 0</div><canvas id="pong-canvas" width="300" height="220"></canvas><div style="font-size:12px;color:#666;margin-top:6px">mouse or touch to move your paddle (left)</div>';
+    startPong();
+  } else if (type === 'whack') {
+    title.textContent = '🔨 Whack-a-mole';
+    content.innerHTML = '<div id="whack-score">score: 0 | time: 30s</div><div id="whack-grid"></div>';
+    startWhack();
+  } else if (type === 'typing') {
+    title.textContent = '⌨️ Typing test';
+    content.innerHTML = '<div id="typing-text"></div><input id="typing-input" placeholder="start typing..." autocomplete="off" spellcheck="false"><div id="typing-stats"></div>';
+    startTyping();
+  } else if (type === 'rps') {
+    title.textContent = '✊ Rock Paper Scissors';
+    content.innerHTML = '<div id="rps-score">wins: 0 | losses: 0 | ties: 0</div><div id="rps-btns"><button onclick="playRPS(\'rock\')">🪨</button><button onclick="playRPS(\'paper\')">📄</button><button onclick="playRPS(\'scissors\')">✂️</button></div><div id="rps-result"></div>';
+    window.rpsW=0; window.rpsL=0; window.rpsT=0;
+  } else if (type === 'memory') {
+    title.textContent = '🃏 Memory';
+    content.innerHTML = '<div id="memory-moves">moves: 0</div><div id="memory-grid"></div>';
+    startMemory();
+  } else if (type === 'magic8') {
+    title.textContent = '🎱 Magic 8 Ball';
+    content.innerHTML = '<input id="ball-q" placeholder="ask a question..."><button class="fun-btn" onclick="shake8ball()">🎱 shake it</button><div id="ball-display">ask me anything</div>';
+  } else if (type === 'hacker') {
+    title.textContent = '💻 Hacker terminal';
+    content.innerHTML = '<div id="hacker-canvas-wrap"></div>';
+    startHacker();
+  } else if (type === 'draw') {
+    title.textContent = '🎨 Draw';
+    content.innerHTML = '<div id="draw-controls"><input type="color" id="draw-color" value="#ff0000"><input type="range" id="draw-size" min="1" max="30" value="6"><button onclick="document.getElementById(\'draw-canvas\').getContext(\'2d\').clearRect(0,0,400,300)">clear</button></div><canvas id="draw-canvas" width="380" height="260"></canvas>';
+    startDraw();
+  } else if (type === 'compliment') {
+    title.textContent = '💖 Compliment me';
+    content.innerHTML = '<div id="compliment-box">press the button!</div><button class="fun-btn" onclick="giveCompliment()">💖 compliment me</button>';
+  } else if (type === 'destruct') {
+    title.textContent = '💣 Self destruct';
+    content.innerHTML = '<div id="destruct-num">10</div><div id="destruct-msg">this page will self destruct in...</div><button class="fun-btn" onclick="startDestruct()">💣 initiate</button>';
+  } else if (type === 'notes') {
+    title.textContent = '📝 Notes';
+    const saved = localStorage.getItem('brody-notes') || '';
+    content.innerHTML = `<textarea id="notes-area" placeholder="write anything...">${saved}</textarea><div id="notes-saved">saved!</div>`;
+    document.getElementById('notes-area').addEventListener('input', () => {
+      localStorage.setItem('brody-notes', document.getElementById('notes-area').value);
+      const s = document.getElementById('notes-saved');
+      s.style.display = 'block';
+      clearTimeout(window._notesT);
+      window._notesT = setTimeout(() => s.style.display='none', 1200);
+    });
+  } else if (type === 'todo') {
+    title.textContent = '✅ To-do list';
+    content.innerHTML = '<div id="todo-input-row"><input id="todo-input" placeholder="add a task..."><button id="todo-add" onclick="addTodo()">add</button></div><ul id="todo-list"></ul>';
+    document.getElementById('todo-input').addEventListener('keydown', e => { if(e.key==='Enter') addTodo(); });
+    renderTodos();
+  } else if (type === 'color') {
+    title.textContent = '🎨 Site background color';
+    content.innerHTML = '<div id="color-picker-wrap"><input type="color" id="site-color-pick" value="#000000"><span id="color-label">pick a background color</span></div>';
+    document.getElementById('site-color-pick').addEventListener('input', e => {
+      document.body.style.backgroundColor = e.target.value;
+    });
+  } else if (type === 'fontsize') {
+    title.textContent = '🔤 Font size';
+    content.innerHTML = '<div id="font-slider-wrap"><input type="range" id="font-size-slider" min="10" max="32" value="16"><span id="font-size-val">16px</span></div>';
+    document.getElementById('font-size-slider').addEventListener('input', e => {
+      document.querySelectorAll('h1,h2,p').forEach(el => el.style.fontSize = e.target.value + 'px');
+      document.getElementById('font-size-val').textContent = e.target.value + 'px';
+    });
+  } else if (type === 'stopwatch') {
+    title.textContent = '⏱ Stopwatch';
+    content.innerHTML = '<div id="stopwatch-display">00:00.0</div><div id="stopwatch-btns"><button onclick="swStart()">start</button><button onclick="swStop()">stop</button><button onclick="swReset()">reset</button></div>';
+    window._swRunning=false; window._swStart=0; window._swElapsed=0;
+    window._gameCleanup = () => clearInterval(window._swInterval);
+  }
+}
+
+// SNAKE
+function startSnake() {
+  const c = document.getElementById('snake-canvas');
+  const x = c.getContext('2d');
+  const SZ = 20, W = 14, H = 14;
+  let snake = [{x:7,y:7}], dir = {x:1,y:0}, food = {x:3,y:3}, score = 0, running = true;
+  function rndFood() { return {x:Math.floor(Math.random()*W), y:Math.floor(Math.random()*H)}; }
+  function draw() {
+    x.fillStyle='#000'; x.fillRect(0,0,280,280);
+    x.fillStyle='#f44'; x.fillRect(food.x*SZ,food.y*SZ,SZ-1,SZ-1);
+    snake.forEach((s,i) => { x.fillStyle = i===0?'#4f4':'#2a2'; x.fillRect(s.x*SZ,s.y*SZ,SZ-1,SZ-1); });
+  }
+  function step() {
+    if (!running) return;
+    const head = {x:(snake[0].x+dir.x+W)%W, y:(snake[0].y+dir.y+H)%H};
+    if (snake.some(s=>s.x===head.x&&s.y===head.y)) { running=false; document.getElementById('snake-score').textContent='game over! score: '+score; return; }
+    snake.unshift(head);
+    if (head.x===food.x&&head.y===food.y) { score++; document.getElementById('snake-score').textContent='score: '+score; food=rndFood(); } else snake.pop();
+    draw();
+  }
+  document.addEventListener('keydown', function snakeKey(e) {
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+    if (e.key==='ArrowUp'&&dir.y===0) dir={x:0,y:-1};
+    else if (e.key==='ArrowDown'&&dir.y===0) dir={x:0,y:1};
+    else if (e.key==='ArrowLeft'&&dir.x===0) dir={x:-1,y:0};
+    else if (e.key==='ArrowRight'&&dir.x===0) dir={x:1,y:0};
+    if (!document.getElementById('snake-canvas')) document.removeEventListener('keydown',snakeKey);
+  });
+  const iv = setInterval(step, 130);
+  window._gameCleanup = () => { running=false; clearInterval(iv); };
+  draw();
+}
+
+// PONG
+function startPong() {
+  const c = document.getElementById('pong-canvas');
+  const x = c.getContext('2d');
+  let py=80,ay=80,bx=150,by=110,bdx=3,bdy=2,ps=0,as=0,running=true;
+  c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();py=e.clientY-r.top-30;});
+  c.addEventListener('touchmove',e=>{e.preventDefault();const r=c.getBoundingClientRect();py=e.touches[0].clientY-r.top-30;},{passive:false});
+  function draw(){
+    x.fillStyle='#000';x.fillRect(0,0,300,220);
+    x.fillStyle='#fff';x.fillRect(6,py,8,60);x.fillRect(286,ay,8,60);
+    x.beginPath();x.arc(bx,by,7,0,Math.PI*2);x.fill();
+  }
+  function step(){
+    if(!running)return;
+    bx+=bdx;by+=bdy;
+    if(by<7||by>213)bdy*=-1;
+    if(bx<22&&by>py&&by<py+60){bdx=Math.abs(bdx);bdy+=(by-(py+30))*0.08;}
+    if(bx>278&&by>ay&&by<ay+60){bdx=-Math.abs(bdx);}
+    ay+=(by-ay-30)*0.06;
+    if(bx<0){as++;ps=ps;document.getElementById('pong-score').textContent=`you: ${ps} — ai: ${as}`;bx=150;by=110;bdx=3;bdy=2;}
+    if(bx>300){ps++;document.getElementById('pong-score').textContent=`you: ${ps} — ai: ${as}`;bx=150;by=110;bdx=-3;bdy=2;}
+    draw();
+  }
+  const iv=setInterval(step,16);
+  window._gameCleanup=()=>{running=false;clearInterval(iv);};
+  draw();
+}
+
+// WHACK
+function startWhack() {
+  const grid = document.getElementById('whack-grid');
+  let score=0,timeLeft=30,moleIdx=-1;
+  for(let i=0;i<9;i++){const h=document.createElement('div');h.className='mole-hole';h.dataset.i=i;h.textContent='🕳';h.addEventListener('click',()=>{if(parseInt(h.dataset.i)===moleIdx){score++;document.getElementById('whack-score').textContent=`score: ${score} | time: ${timeLeft}s`;}});grid.appendChild(h);}
+  function showMole(){if(moleIdx>=0){grid.children[moleIdx].textContent='🕳';}moleIdx=Math.floor(Math.random()*9);grid.children[moleIdx].textContent='🦔';}
+  const moleIv=setInterval(showMole,700);
+  const timeIv=setInterval(()=>{timeLeft--;document.getElementById('whack-score').textContent=`score: ${score} | time: ${timeLeft}s`;if(timeLeft<=0){clearInterval(moleIv);clearInterval(timeIv);if(moleIdx>=0)grid.children[moleIdx].textContent='🕳';document.getElementById('whack-score').textContent=`done! final score: ${score}`;}},1000);
+  window._gameCleanup=()=>{clearInterval(moleIv);clearInterval(timeIv);};
+}
+
+// TYPING
+function startTyping() {
+  const words = 'the quick brown fox jumps over the lazy dog pack my box with five dozen liquor jugs how vexingly quick daft zebras jump'.split(' ');
+  let idx=0,mistakes=0,startT=null;
+  const textEl=document.getElementById('typing-text');
+  const input=document.getElementById('typing-input');
+  textEl.innerHTML=words.map((w,i)=>`<span id="tw${i}">${w} </span>`).join('');
+  document.getElementById(`tw0`).className='current';
+  input.addEventListener('input',()=>{
+    if(!startT)startT=Date.now();
+    const val=input.value;
+    const word=words[idx];
+    if(val.endsWith(' ')){
+      const typed=val.trim();
+      if(typed===word){document.getElementById(`tw${idx}`).className='done';}
+      else{document.getElementById(`tw${idx}`).className='wrong';mistakes++;}
+      idx++;input.value='';
+      if(idx<words.length)document.getElementById(`tw${idx}`).className='current';
+      else{const wpm=Math.round((words.length/((Date.now()-startT)/60000)));document.getElementById('typing-stats').textContent=`done! ${wpm} wpm, ${mistakes} mistakes`;}
+    }
+  });
+  input.focus();
+}
+
+// RPS
+function playRPS(choice) {
+  const opts=['rock','paper','scissors'];
+  const ai=opts[Math.floor(Math.random()*3)];
+  const map={rock:'🪨',paper:'📄',scissors:'✂️'};
+  let result='';
+  if(choice===ai){window.rpsT++;result='tie!';}
+  else if((choice==='rock'&&ai==='scissors')||(choice==='paper'&&ai==='rock')||(choice==='scissors'&&ai==='paper')){window.rpsW++;result='you win!';}
+  else{window.rpsL++;result='you lose!';}
+  document.getElementById('rps-result').textContent=`you: ${map[choice]} vs ai: ${map[ai]} — ${result}`;
+  document.getElementById('rps-score').textContent=`wins: ${window.rpsW} | losses: ${window.rpsL} | ties: ${window.rpsT}`;
+}
+
+// MEMORY
+function startMemory() {
+  const emojis=['🐶','🐱','🦊','🐸','🦋','🐙','🦄','🍕'];
+  let cards=[...emojis,...emojis].sort(()=>Math.random()-0.5);
+  let flipped=[],matched=0,moves=0,locked=false;
+  const grid=document.getElementById('memory-grid');
+  cards.forEach((e,i)=>{
+    const c=document.createElement('div');c.className='mem-card';c.textContent='❓';
+    c.addEventListener('click',()=>{
+      if(locked||c.classList.contains('matched')||c.classList.contains('flipped'))return;
+      c.textContent=e;c.classList.add('flipped');flipped.push({el:c,val:e});
+      if(flipped.length===2){moves++;document.getElementById('memory-moves').textContent=`moves: ${moves}`;locked=true;
+        if(flipped[0].val===flipped[1].val){flipped[0].el.classList.add('matched');flipped[1].el.classList.add('matched');flipped=[];locked=false;matched++;if(matched===8)document.getElementById('memory-moves').textContent=`done in ${moves} moves!`;}
+        else{setTimeout(()=>{flipped.forEach(f=>{f.el.textContent='❓';f.el.classList.remove('flipped');});flipped=[];locked=false;},900);}
+      }
+    });
+    grid.appendChild(c);
+  });
+}
+
+// MAGIC 8 BALL
+function shake8ball() {
+  const answers=['it is certain','it is decidedly so','without a doubt','yes definitely','you may rely on it','as i see it yes','most likely','outlook good','yes','signs point to yes','reply hazy try again','ask again later','better not tell you now','cannot predict now','concentrate and ask again','don\'t count on it','my reply is no','my sources say no','outlook not so good','very doubtful'];
+  document.getElementById('ball-display').textContent=answers[Math.floor(Math.random()*answers.length)];
+}
+
+// HACKER
+function startHacker() {
+  const el=document.getElementById('hacker-canvas-wrap');
+  const lines=['initializing secure connection...','bypassing firewall...','access granted','loading mainframe...','decrypting files...','kernel breach detected','rerouting through proxy...','ssh tunnel established','scanning ports: 22 80 443 8080','vulnerability found: CVE-2024-????','injecting payload...','extracting data...','covering tracks...','wiping logs...','done. no one will ever know.','...','just kidding lol','this is brody\'s site','please subscribe to the YT channel','🐶 woof'];
+  let i=0;
+  function addLine(){if(i>=lines.length)return;el.textContent+='\n> '+lines[i++];el.scrollTop=el.scrollHeight;setTimeout(addLine,400+Math.random()*600);}
+  addLine();
+}
+
+// DRAW
+function startDraw() {
+  const c=document.getElementById('draw-canvas');
+  const x=c.getContext('2d');
+  let drawing=false;
+  c.addEventListener('mousedown',e=>{drawing=true;x.beginPath();x.moveTo(e.offsetX,e.offsetY);});
+  c.addEventListener('mousemove',e=>{if(!drawing)return;x.lineTo(e.offsetX,e.offsetY);x.strokeStyle=document.getElementById('draw-color').value;x.lineWidth=document.getElementById('draw-size').value;x.lineCap='round';x.stroke();});
+  c.addEventListener('mouseup',()=>drawing=false);
+  c.addEventListener('mouseleave',()=>drawing=false);
+}
+
+// COMPLIMENT
+function giveCompliment(){
+  const c=['you are genuinely awesome','your site is actually really cool','10/10 taste in music probably','the dog pet was a great idea','you clearly have good ideas','brody is carrying the web','future dev right here','your YT is gonna blow up','certified legend','criminally underrated'];
+  document.getElementById('compliment-box').textContent=c[Math.floor(Math.random()*c.length)];
+}
+
+
+
+// SELF DESTRUCT
+function startDestruct(){
+  let n=10;
+  const iv=setInterval(()=>{
+    n--;
+    document.getElementById('destruct-num').textContent=n;
+    if(n<=0){clearInterval(iv);document.getElementById('destruct-num').textContent='💥';document.getElementById('destruct-msg').textContent='...just kidding. nothing happened lol';}
+  },1000);
+  window._gameCleanup=()=>clearInterval(iv);
+}
+
+// TODO
+function getTodos(){return JSON.parse(localStorage.getItem('brody-todos')||'[]');}
+function saveTodos(t){localStorage.setItem('brody-todos',JSON.stringify(t));}
+function renderTodos(){
+  const list=document.getElementById('todo-list');if(!list)return;
+  const todos=getTodos();list.innerHTML='';
+  todos.forEach((t,i)=>{
+    const li=document.createElement('li');if(t.done)li.classList.add('done');
+    li.innerHTML=`<input type="checkbox" ${t.done?'checked':''}><span>${t.text}</span><button onclick="deleteTodo(${i})">✕</button>`;
+    li.querySelector('input').addEventListener('change',()=>{todos[i].done=!todos[i].done;saveTodos(todos);renderTodos();});
+    list.appendChild(li);
+  });
+}
+function addTodo(){const input=document.getElementById('todo-input');if(!input.value.trim())return;const t=getTodos();t.push({text:input.value.trim(),done:false});saveTodos(t);input.value='';renderTodos();}
+function deleteTodo(i){const t=getTodos();t.splice(i,1);saveTodos(t);renderTodos();}
+
+// STOPWATCH
+function swStart(){if(window._swRunning)return;window._swRunning=true;window._swStart=Date.now()-window._swElapsed;window._swInterval=setInterval(()=>{window._swElapsed=Date.now()-window._swStart;const t=window._swElapsed;const m=Math.floor(t/60000);const s=Math.floor((t%60000)/1000);const ms=Math.floor((t%1000)/100);const el=document.getElementById('stopwatch-display');if(el)el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}.${ms}`;},100);}
+function swStop(){window._swRunning=false;clearInterval(window._swInterval);}
+function swReset(){swStop();window._swElapsed=0;const el=document.getElementById('stopwatch-display');if(el)el.textContent='00:00.0';}
+</script>
+
+</body>
+</html>
